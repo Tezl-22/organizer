@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="uk">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Органайзер{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header>
+    <h1>Органайзер</h1>
+    <nav>
+        <a href="{{ url_for('task_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('task') }}">Задачі</a>
+    </nav>
+</header>
+<main>
+    {% for message in get_flashed_messages() %}
+        <div class="flash">{{ message }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+</main>
+</body>
+</html>

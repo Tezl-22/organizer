@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Редагування задачі' if task_id else 'Нова задача' }}{% endblock %}
+{% block content %}
+<h2>{{ 'Редагування задачі' if task_id else 'Нова задача' }}</h2>
+{% include "_errors.html" %}
+<form method="post" class="card">
+    <label for="title">Назва *</label>
+    <input type="text" id="title" name="title" maxlength="200" value="{{ form.title }}">
+
+    <label for="description">Опис</label>
+    <textarea id="description" name="description">{{ form.description }}</textarea>
+
+    <label for="priority">Пріоритет</label>
+    <select id="priority" name="priority">
+        {% for value, name in priorities.items() %}
+        <option value="{{ value }}" {{ 'selected' if form.priority|string == value|string }}>{{ name }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="due_date">Термін виконання</label>
+    <input type="date" id="due_date" name="due_date" value="{{ form.due_date or '' }}">
+
+    <p>
+        <button class="btn" type="submit">Зберегти</button>
+        <a class="btn secondary" href="{{ url_for('task_list') }}">Скасувати</a>
+    </p>
+</form>
+{% endblock %}

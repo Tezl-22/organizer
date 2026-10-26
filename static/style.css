@@ -1,0 +1,47 @@
+/* Стилі органайзера */
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #f3f5f8; color: #222; }
+header { background: #2f5d8a; color: #fff; padding: 12px 24px; display: flex; align-items: center; gap: 32px; }
+header h1 { margin: 0; font-size: 22px; }
+nav a { color: #fff; text-decoration: none; margin-right: 18px; font-weight: bold; }
+nav a.active, nav a:hover { text-decoration: underline; }
+main { max-width: 1100px; margin: 20px auto; padding: 0 16px; }
+h2 { margin-top: 0; }
+.card { background: #fff; border-radius: 6px; padding: 16px 20px; box-shadow: 0 1px 3px rgba(0,0,0,.12); margin-bottom: 16px; }
+table { width: 100%; border-collapse: collapse; background: #fff; }
+th, td { padding: 8px 10px; border-bottom: 1px solid #e1e4e8; text-align: left; vertical-align: top; }
+th { background: #eef2f6; }
+.btn { display: inline-block; padding: 6px 12px; border: none; border-radius: 4px; background: #2f5d8a; color: #fff; text-decoration: none; cursor: pointer; font-size: 14px; }
+.btn.secondary { background: #6c7a89; }
+.btn.danger { background: #c0392b; }
+.btn.small { padding: 3px 8px; font-size: 13px; }
+form.inline { display: inline; }
+label { display: block; margin: 10px 0 4px; font-weight: bold; }
+input[type=text], input[type=date], input[type=datetime-local], input[type=search], textarea, select {
+    width: 100%; max-width: 480px; padding: 6px 8px; border: 1px solid #b8c0c8; border-radius: 4px; font-size: 14px; }
+textarea { min-height: 110px; }
+.filters { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+.filters label { margin: 0 0 4px; }
+.filters select, .filters input { width: auto; }
+.flash { padding: 10px 14px; border-radius: 4px; margin-bottom: 12px; background: #dff0d8; color: #2d6a2d; }
+.errors { padding: 10px 14px; border-radius: 4px; margin-bottom: 12px; background: #fbe3e1; color: #a12a1f; }
+.errors ul { margin: 0; padding-left: 18px; }
+.banner { background: #fff4d6; border-left: 5px solid #e0a800; padding: 10px 14px; margin-bottom: 16px; border-radius: 4px; }
+.banner.overdue { background: #fde2e0; border-color: #c0392b; }
+.prio-3 { color: #c0392b; font-weight: bold; }
+.prio-2 { color: #d68910; }
+.prio-1 { color: #5d6d7e; }
+tr.done td { color: #999; text-decoration: line-through; }
+tr.overdue td { background: #fdecea; }
+.muted { color: #777; font-size: 13px; }
+.note { white-space: pre-wrap; }
+/* Календар */
+.calendar th { text-align: center; }
+.calendar td { height: 105px; width: 14.28%; font-size: 13px; }
+.calendar td.other { background: #f6f7f9; color: #aaa; }
+.calendar td.today { outline: 2px solid #2f5d8a; outline-offset: -2px; }
+.calendar .day { font-weight: bold; margin-bottom: 4px; }
+.calendar .item { display: block; margin: 2px 0; padding: 1px 4px; border-radius: 3px; background: #e3edf7; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.calendar .item.reminder { background: #fff0c2; }
+.calendar .item.done { text-decoration: line-through; color: #888; }
+.month-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }

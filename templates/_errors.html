@@ -1,0 +1,6 @@
+{% if errors %}
+<div class="errors">
+    <strong>Виправте помилки:</strong>
+    <ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul>
+</div>
+{% endif %}

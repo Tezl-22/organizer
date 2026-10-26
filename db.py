@@ -41,3 +41,41 @@ class BaseRepository:
         db = get_db()
         db.execute(f"DELETE FROM {self.table} WHERE id = ?", (item_id,))
         db.commit()
+
+
+class TaskRepository(BaseRepository):
+    """Запити до таблиці задач."""
+
+    table = "tasks"
+
+    def list(self):
+        # спочатку невиконані, потім за терміном (порожній термін - в кінці)
+        return get_db().execute(
+            "SELECT * FROM tasks ORDER BY is_done, due_date IS NULL, due_date, priority DESC"
+        ).fetchall()
+
+    def create(self, title, description, priority, due_date):
+        db = get_db()
+        cur = db.execute(
+            "INSERT INTO tasks (title, description, priority, due_date) VALUES (?, ?, ?, ?)",
+            (title, description, priority, due_date),
+        )
+        db.commit()
+        return cur.lastrowid
+
+    def update(self, task_id, title, description, priority, due_date):
+        db = get_db()
+        db.execute(
+            "UPDATE tasks SET title = ?, description = ?, priority = ?, due_date = ? WHERE id = ?",
+            (title, description, priority, due_date, task_id),
+        )
+        db.commit()
+
+    def toggle(self, task_id):
+        """Змінює статус задачі: виконана <-> невиконана."""
+        db = get_db()
+        db.execute("UPDATE tasks SET is_done = 1 - is_done WHERE id = ?", (task_id,))
+        db.commit()
+
+
+tasks = TaskRepository()
