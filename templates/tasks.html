@@ -3,12 +3,32 @@
 {% block content %}
 <h2>Задачі</h2>
 <div class="card">
-    <a class="btn" href="{{ url_for('task_new') }}">+ Нова задача</a>
+    <form method="get" class="filters">
+        <div>
+            <label for="status">Статус</label>
+            <select id="status" name="status">
+                <option value="all" {{ 'selected' if status == 'all' }}>Усі</option>
+                <option value="active" {{ 'selected' if status == 'active' }}>Невиконані</option>
+                <option value="done" {{ 'selected' if status == 'done' }}>Виконані</option>
+            </select>
+        </div>
+        <div>
+            <label for="priority">Пріоритет</label>
+            <select id="priority" name="priority">
+                <option value="">Будь-який</option>
+                {% for value, name in priorities.items() %}
+                <option value="{{ value }}" {{ 'selected' if priority == value }}>{{ name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button class="btn secondary" type="submit">Фільтрувати</button>
+        <a class="btn" href="{{ url_for('task_new') }}">+ Нова задача</a>
+    </form>
 </div>
 <table>
     <tr><th>Виконано</th><th>Назва</th><th>Пріоритет</th><th>Термін</th><th>Дії</th></tr>
     {% for t in tasks %}
-    <tr class="{{ 'done' if t.is_done }}">
+    <tr class="{{ 'done' if t.is_done }} {{ 'overdue' if not t.is_done and t.due_date and t.due_date < today }}">
         <td>
             <form class="inline" method="post" action="{{ url_for('task_toggle', task_id=t.id) }}">
                 <button class="btn small secondary" type="submit">{{ '✔' if t.is_done else '○' }}</button>

@@ -66,7 +66,13 @@ def create_app(test_config=None):
 
     @app.route("/tasks")
     def task_list():
-        return render_template("tasks.html", tasks=db.tasks.list(), priorities=PRIORITIES)
+        status = request.args.get("status", "all")
+        priority = request.args.get("priority", type=int)
+        if priority not in PRIORITIES:
+            priority = None
+        return render_template("tasks.html", tasks=db.tasks.list(status, priority),
+                               priorities=PRIORITIES, status=status, priority=priority,
+                               today=date.today().isoformat())
 
     @app.route("/tasks/new", methods=["GET", "POST"])
     def task_new():

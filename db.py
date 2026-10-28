@@ -48,11 +48,20 @@ class TaskRepository(BaseRepository):
 
     table = "tasks"
 
-    def list(self):
+    def list(self, status="all", priority=None):
+        """Список задач з фільтром за статусом (all/active/done) і пріоритетом."""
+        sql = "SELECT * FROM tasks WHERE 1 = 1"
+        params = []
+        if status == "active":
+            sql += " AND is_done = 0"
+        elif status == "done":
+            sql += " AND is_done = 1"
+        if priority:
+            sql += " AND priority = ?"
+            params.append(priority)
         # спочатку невиконані, потім за терміном (порожній термін - в кінці)
-        return get_db().execute(
-            "SELECT * FROM tasks ORDER BY is_done, due_date IS NULL, due_date, priority DESC"
-        ).fetchall()
+        sql += " ORDER BY is_done, due_date IS NULL, due_date, priority DESC"
+        return get_db().execute(sql, params).fetchall()
 
     def create(self, title, description, priority, due_date):
         db = get_db()
