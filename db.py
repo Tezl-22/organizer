@@ -88,3 +88,38 @@ class TaskRepository(BaseRepository):
 
 
 tasks = TaskRepository()
+
+
+class NoteRepository(BaseRepository):
+    """Запити до таблиці нотаток."""
+
+    table = "notes"
+
+    def list(self, search=""):
+        """Список нотаток; якщо задано search - пошук у назві та тексті без урахування регістру."""
+        if search:
+            pattern = f"%{search.lower()}%"
+            return get_db().execute(
+                "SELECT * FROM notes WHERE py_lower(title) LIKE ? OR py_lower(content) LIKE ?"
+                " ORDER BY updated_at DESC",
+                (pattern, pattern),
+            ).fetchall()
+        return get_db().execute("SELECT * FROM notes ORDER BY updated_at DESC").fetchall()
+
+    def create(self, title, content):
+        db = get_db()
+        cur = db.execute("INSERT INTO notes (title, content) VALUES (?, ?)", (title, content))
+        db.commit()
+        return cur.lastrowid
+
+    def update(self, note_id, title, content):
+        db = get_db()
+        db.execute(
+            "UPDATE notes SET title = ?, content = ?, updated_at = datetime('now', 'localtime')"
+            " WHERE id = ?",
+            (title, content, note_id),
+        )
+        db.commit()
+
+
+notes = NoteRepository()

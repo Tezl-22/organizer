@@ -10,6 +10,7 @@
     <h1>Органайзер</h1>
     <nav>
         <a href="{{ url_for('task_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('task') }}">Задачі</a>
+        <a href="{{ url_for('note_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('note') }}">Нотатки</a>
     </nav>
 </header>
 <main>

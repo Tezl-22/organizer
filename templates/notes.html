@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Нотатки{% endblock %}
+{% block content %}
+<h2>Нотатки</h2>
+<div class="card">
+    <form method="get" class="filters">
+        <div>
+            <label for="q">Пошук</label>
+            <input type="search" id="q" name="q" value="{{ search }}" placeholder="Слово з назви або тексту">
+        </div>
+        <button class="btn secondary" type="submit">Знайти</button>
+        {% if search %}<a class="btn secondary" href="{{ url_for('note_list') }}">Скинути</a>{% endif %}
+        <a class="btn" href="{{ url_for('note_new') }}">+ Нова нотатка</a>
+    </form>
+</div>
+{% for n in notes %}
+<div class="card">
+    <h3>{{ n.title }}</h3>
+    <div class="note">{{ n.content }}</div>
+    <p class="muted">Змінено: {{ n.updated_at }}</p>
+    <a class="btn small" href="{{ url_for('note_edit', note_id=n.id) }}">Редагувати</a>
+    <form class="inline" method="post" action="{{ url_for('note_delete', note_id=n.id) }}" onsubmit="return confirm('Видалити нотатку?');">
+        <button class="btn small danger" type="submit">Видалити</button>
+    </form>
+</div>
+{% else %}
+<p class="muted">{{ 'Нічого не знайдено.' if search else 'Нотаток немає.' }}</p>
+{% endfor %}
+{% endblock %}

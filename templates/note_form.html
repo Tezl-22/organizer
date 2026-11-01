@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Редагування нотатки' if note_id else 'Нова нотатка' }}{% endblock %}
+{% block content %}
+<h2>{{ 'Редагування нотатки' if note_id else 'Нова нотатка' }}</h2>
+{% include "_errors.html" %}
+<form method="post" class="card">
+    <label for="title">Назва *</label>
+    <input type="text" id="title" name="title" maxlength="200" value="{{ form.title }}">
+
+    <label for="content">Текст</label>
+    <textarea id="content" name="content">{{ form.content }}</textarea>
+
+    <p>
+        <button class="btn" type="submit">Зберегти</button>
+        <a class="btn secondary" href="{{ url_for('note_list') }}">Скасувати</a>
+    </p>
+</form>
+{% endblock %}

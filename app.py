@@ -40,6 +40,22 @@ def task_form_data():
     }
 
 
+def validate_note(form):
+    errors = []
+    if not form["title"]:
+        errors.append("Назва нотатки не може бути порожньою.")
+    elif len(form["title"]) > 200:
+        errors.append("Назва нотатки не може бути довшою за 200 символів.")
+    return errors
+
+
+def note_form_data():
+    return {
+        "title": request.form.get("title", "").strip(),
+        "content": request.form.get("content", "").strip(),
+    }
+
+
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
@@ -115,6 +131,47 @@ def create_app(test_config=None):
         db.tasks.delete(task_id)
         flash("Задачу видалено.")
         return redirect(url_for("task_list"))
+
+    # ---------- Нотатки ----------
+    @app.route("/notes")
+    def note_list():
+        search = request.args.get("q", "").strip()
+        return render_template("notes.html", notes=db.notes.list(search), search=search)
+
+    @app.route("/notes/new", methods=["GET", "POST"])
+    def note_new():
+        form = {"title": "", "content": ""}
+        errors = []
+        if request.method == "POST":
+            form = note_form_data()
+            errors = validate_note(form)
+            if not errors:
+                db.notes.create(form["title"], form["content"])
+                flash("Нотатку додано.")
+                return redirect(url_for("note_list"))
+        return render_template("note_form.html", form=form, errors=errors,
+                               note_id=None), 400 if errors else 200
+
+    @app.route("/notes/<int:note_id>/edit", methods=["GET", "POST"])
+    def note_edit(note_id):
+        note = db.notes.get(note_id) or abort(404)
+        form = dict(note)
+        errors = []
+        if request.method == "POST":
+            form = note_form_data()
+            errors = validate_note(form)
+            if not errors:
+                db.notes.update(note_id, form["title"], form["content"])
+                flash("Нотатку оновлено.")
+                return redirect(url_for("note_list"))
+        return render_template("note_form.html", form=form, errors=errors,
+                               note_id=note_id), 400 if errors else 200
+
+    @app.post("/notes/<int:note_id>/delete")
+    def note_delete(note_id):
+        db.notes.delete(note_id)
+        flash("Нотатку видалено.")
+        return redirect(url_for("note_list"))
 
     return app
 
