@@ -1,12 +1,14 @@
 """Органайзер: вебзастосунок на Flask (маршрути та перевірка введених даних)."""
 import os
-from datetime import date
+from datetime import date, datetime, timedelta
 
 from flask import Flask, abort, flash, redirect, render_template, request, url_for
 
 import db
 
 PRIORITIES = {1: "Низький", 2: "Середній", 3: "Високий"}
+DATETIME_FORMAT = "%Y-%m-%d %H:%M"
+UPCOMING_DAYS = 7  # скільки днів наперед показувати найближчі нагадування
 
 
 def parse_date(value):
@@ -56,6 +58,39 @@ def note_form_data():
     }
 
 
+def parse_datetime(value):
+    """Приймає 'YYYY-MM-DDTHH:MM' (поле datetime-local) або 'YYYY-MM-DD HH:MM'."""
+    try:
+        return datetime.strptime(value.replace("T", " "), DATETIME_FORMAT)
+    except ValueError:
+        return None
+
+
+def validate_reminder(form):
+    errors = []
+    if not form["title"]:
+        errors.append("Назва нагадування не може бути порожньою.")
+    elif len(form["title"]) > 200:
+        errors.append("Назва нагадування не може бути довшою за 200 символів.")
+    if not form["remind_at"]:
+        errors.append("Вкажіть дату і час нагадування.")
+    elif parse_datetime(form["remind_at"]) is None:
+        errors.append("Некоректні дата і час нагадування.")
+    return errors
+
+
+def reminder_form_data():
+    return {
+        "title": request.form.get("title", "").strip(),
+        "description": request.form.get("description", "").strip(),
+        "remind_at": request.form.get("remind_at", "").strip(),
+    }
+
+
+def now_str(delta=timedelta()):
+    return (datetime.now() + delta).strftime(DATETIME_FORMAT)
+
+
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
@@ -74,6 +109,14 @@ def create_app(test_config=None):
             "SELECT name FROM sqlite_master WHERE name = 'tasks'"
         ).fetchone():
             db.init_db()
+
+    @app.context_processor
+    def reminder_banner():
+        """Дані для банера на кожній сторінці: прострочені та найближчі за добу."""
+        return {
+            "banner_overdue": len(db.reminders.overdue(now_str())),
+            "banner_soon": db.reminders.upcoming(now_str(), now_str(timedelta(days=1))),
+        }
 
     # ---------- Задачі ----------
     @app.route("/")
@@ -172,6 +215,56 @@ def create_app(test_config=None):
         db.notes.delete(note_id)
         flash("Нотатку видалено.")
         return redirect(url_for("note_list"))
+
+    # ---------- Нагадування ----------
+    @app.route("/reminders")
+    def reminder_list():
+        now = now_str()
+        return render_template(
+            "reminders.html",
+            overdue=db.reminders.overdue(now),
+            upcoming=db.reminders.upcoming(now, now_str(timedelta(days=UPCOMING_DAYS))),
+            reminders=db.reminders.list(),
+            now=now,
+            upcoming_days=UPCOMING_DAYS,
+        )
+
+    @app.route("/reminders/new", methods=["GET", "POST"])
+    def reminder_new():
+        form = {"title": "", "description": "", "remind_at": ""}
+        errors = []
+        if request.method == "POST":
+            form = reminder_form_data()
+            errors = validate_reminder(form)
+            if not errors:
+                remind_at = parse_datetime(form["remind_at"]).strftime(DATETIME_FORMAT)
+                db.reminders.create(form["title"], form["description"], remind_at)
+                flash("Нагадування додано.")
+                return redirect(url_for("reminder_list"))
+        return render_template("reminder_form.html", form=form, errors=errors,
+                               reminder_id=None), 400 if errors else 200
+
+    @app.route("/reminders/<int:reminder_id>/edit", methods=["GET", "POST"])
+    def reminder_edit(reminder_id):
+        reminder = db.reminders.get(reminder_id) or abort(404)
+        form = dict(reminder)
+        errors = []
+        if request.method == "POST":
+            form = reminder_form_data()
+            errors = validate_reminder(form)
+            if not errors:
+                remind_at = parse_datetime(form["remind_at"]).strftime(DATETIME_FORMAT)
+                db.reminders.update(reminder_id, form["title"], form["description"], remind_at)
+                flash("Нагадування оновлено.")
+                return redirect(url_for("reminder_list"))
+        return render_template("reminder_form.html", form=form, errors=errors,
+                               reminder_id=reminder_id), 400 if errors else 200
+
+    @app.post("/reminders/<int:reminder_id>/delete")
+    def reminder_delete(reminder_id):
+        db.reminders.delete(reminder_id)
+        flash("Нагадування видалено.")
+        return redirect(url_for("reminder_list"))
 
     return app
 

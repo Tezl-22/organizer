@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Нагадування{% endblock %}
+{% block content %}
+<h2>Нагадування</h2>
+<div class="card">
+    <a class="btn" href="{{ url_for('reminder_new') }}">+ Нове нагадування</a>
+</div>
+
+<h3>Прострочені</h3>
+{% with rows = overdue %}{% include "_reminder_rows.html" %}{% endwith %}
+
+<h3>Найближчі {{ upcoming_days }} днів</h3>
+{% with rows = upcoming %}{% include "_reminder_rows.html" %}{% endwith %}
+
+<h3>Усі нагадування</h3>
+{% with rows = reminders %}{% include "_reminder_rows.html" %}{% endwith %}
+{% endblock %}

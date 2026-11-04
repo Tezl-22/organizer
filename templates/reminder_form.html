@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Редагування нагадування' if reminder_id else 'Нове нагадування' }}{% endblock %}
+{% block content %}
+<h2>{{ 'Редагування нагадування' if reminder_id else 'Нове нагадування' }}</h2>
+{% include "_errors.html" %}
+<form method="post" class="card">
+    <label for="title">Назва *</label>
+    <input type="text" id="title" name="title" maxlength="200" value="{{ form.title }}">
+
+    <label for="description">Опис</label>
+    <textarea id="description" name="description">{{ form.description }}</textarea>
+
+    <label for="remind_at">Дата і час *</label>
+    <input type="datetime-local" id="remind_at" name="remind_at" value="{{ form.remind_at|replace(' ', 'T') }}">
+
+    <p>
+        <button class="btn" type="submit">Зберегти</button>
+        <a class="btn secondary" href="{{ url_for('reminder_list') }}">Скасувати</a>
+    </p>
+</form>
+{% endblock %}

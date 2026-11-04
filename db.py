@@ -123,3 +123,46 @@ class NoteRepository(BaseRepository):
 
 
 notes = NoteRepository()
+
+
+class ReminderRepository(BaseRepository):
+    """Запити до таблиці нагадувань. Час зберігається як рядок 'YYYY-MM-DD HH:MM',
+    тому рядки можна порівнювати напряму."""
+
+    table = "reminders"
+
+    def list(self):
+        return get_db().execute("SELECT * FROM reminders ORDER BY remind_at").fetchall()
+
+    def create(self, title, description, remind_at):
+        db = get_db()
+        cur = db.execute(
+            "INSERT INTO reminders (title, description, remind_at) VALUES (?, ?, ?)",
+            (title, description, remind_at),
+        )
+        db.commit()
+        return cur.lastrowid
+
+    def update(self, reminder_id, title, description, remind_at):
+        db = get_db()
+        db.execute(
+            "UPDATE reminders SET title = ?, description = ?, remind_at = ? WHERE id = ?",
+            (title, description, remind_at, reminder_id),
+        )
+        db.commit()
+
+    def overdue(self, now):
+        """Нагадування, час яких уже минув (now - рядок 'YYYY-MM-DD HH:MM')."""
+        return get_db().execute(
+            "SELECT * FROM reminders WHERE remind_at < ? ORDER BY remind_at", (now,)
+        ).fetchall()
+
+    def upcoming(self, now, until):
+        """Нагадування в проміжку [now; until]."""
+        return get_db().execute(
+            "SELECT * FROM reminders WHERE remind_at >= ? AND remind_at <= ? ORDER BY remind_at",
+            (now, until),
+        ).fetchall()
+
+
+reminders = ReminderRepository()

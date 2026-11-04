@@ -1,0 +1,18 @@
+<table>
+    <tr><th>Дата і час</th><th>Назва</th><th>Опис</th><th>Дії</th></tr>
+    {% for r in rows %}
+    <tr class="{{ 'overdue' if r.remind_at < now }}">
+        <td>{{ r.remind_at }}</td>
+        <td>{{ r.title }}</td>
+        <td>{{ r.description }}</td>
+        <td>
+            <a class="btn small" href="{{ url_for('reminder_edit', reminder_id=r.id) }}">Редагувати</a>
+            <form class="inline" method="post" action="{{ url_for('reminder_delete', reminder_id=r.id) }}" onsubmit="return confirm('Видалити нагадування?');">
+                <button class="btn small danger" type="submit">Видалити</button>
+            </form>
+        </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" class="muted">Немає.</td></tr>
+    {% endfor %}
+</table>

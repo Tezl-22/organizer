@@ -11,11 +11,19 @@
     <nav>
         <a href="{{ url_for('task_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('task') }}">Задачі</a>
         <a href="{{ url_for('note_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('note') }}">Нотатки</a>
+        <a href="{{ url_for('reminder_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('reminder') }}">Нагадування</a>
     </nav>
 </header>
 <main>
     {% for message in get_flashed_messages() %}
         <div class="flash">{{ message }}</div>
+    {% endfor %}
+    {% if banner_overdue %}
+        <div class="banner overdue">Прострочених нагадувань: <strong>{{ banner_overdue }}</strong>.
+            <a href="{{ url_for('reminder_list') }}">Переглянути</a></div>
+    {% endif %}
+    {% for r in banner_soon %}
+        <div class="banner">Найближче нагадування: <strong>{{ r.title }}</strong> — {{ r.remind_at }}</div>
     {% endfor %}
     {% block content %}{% endblock %}
 </main>
