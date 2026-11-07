@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Календар{% endblock %}
+{% block content %}
+{% set py, pm = cal.prev() %}
+{% set ny, nm = cal.next() %}
+<div class="month-nav">
+    <a class="btn secondary" href="{{ url_for('calendar_view', year=py, month=pm) }}">&larr; Попередній</a>
+    <h2>{{ cal.title }}</h2>
+    <a class="btn secondary" href="{{ url_for('calendar_view', year=ny, month=nm) }}">Наступний &rarr;</a>
+</div>
+<table class="calendar">
+    <tr>{% for w in weekdays %}<th>{{ w }}</th>{% endfor %}</tr>
+    {% for week in cal.weeks %}
+    <tr>
+        {% for day in week %}
+        {% set key = day.isoformat() %}
+        <td class="{{ 'other' if not cal.is_current_month(day) }} {{ 'today' if day == today }}">
+            <div class="day">{{ day.day }}</div>
+            {% for t in day_tasks.get(key, []) %}
+                <a class="item {{ 'done' if t.is_done }}" href="{{ url_for('task_edit', task_id=t.id) }}" title="{{ t.title }}">&#9744; {{ t.title }}</a>
+            {% endfor %}
+            {% for r in day_reminders.get(key, []) %}
+                <a class="item reminder" href="{{ url_for('reminder_edit', reminder_id=r.id) }}" title="{{ r.title }}">&#9200; {{ r.remind_at[11:] }} {{ r.title }}</a>
+            {% endfor %}
+        </td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
+<p class="muted">&#9744; — задача з терміном, &#9200; — нагадування.</p>
+{% endblock %}

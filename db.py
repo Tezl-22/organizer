@@ -86,6 +86,13 @@ class TaskRepository(BaseRepository):
         db.execute("UPDATE tasks SET is_done = 1 - is_done WHERE id = ?", (task_id,))
         db.commit()
 
+    def for_period(self, start, end):
+        """Задачі з терміном у проміжку дат [start; end] (рядки YYYY-MM-DD)."""
+        return get_db().execute(
+            "SELECT * FROM tasks WHERE due_date BETWEEN ? AND ? ORDER BY priority DESC",
+            (start, end),
+        ).fetchall()
+
 
 tasks = TaskRepository()
 
@@ -164,5 +171,14 @@ class ReminderRepository(BaseRepository):
             (now, until),
         ).fetchall()
 
+    def for_period(self, start, end):
+        """Нагадування в проміжку дат [start; end] включно."""
+        return get_db().execute(
+            "SELECT * FROM reminders WHERE substr(remind_at, 1, 10) BETWEEN ? AND ?"
+            " ORDER BY remind_at",
+            (start, end),
+        ).fetchall()
+
 
 reminders = ReminderRepository()
+

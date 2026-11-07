@@ -5,6 +5,7 @@ from datetime import date, datetime, timedelta
 from flask import Flask, abort, flash, redirect, render_template, request, url_for
 
 import db
+from month_calendar import WEEKDAY_NAMES, CalendarMonth
 
 PRIORITIES = {1: "Низький", 2: "Середній", 3: "Високий"}
 DATETIME_FORMAT = "%Y-%m-%d %H:%M"
@@ -265,6 +266,27 @@ def create_app(test_config=None):
         db.reminders.delete(reminder_id)
         flash("Нагадування видалено.")
         return redirect(url_for("reminder_list"))
+
+    # ---------- Календар ----------
+    @app.route("/calendar")
+    def calendar_view():
+        today = date.today()
+        year = request.args.get("year", today.year, type=int)
+        month = request.args.get("month", today.month, type=int)
+        if not (1 <= month <= 12 and 1900 <= year <= 2100):
+            year, month = today.year, today.month
+        cal = CalendarMonth(year, month)
+        start, end = cal.first_day.isoformat(), cal.last_day.isoformat()
+
+        # групуємо задачі та нагадування за датою: {'2026-11-14': [...]}
+        day_tasks, day_reminders = {}, {}
+        for t in db.tasks.for_period(start, end):
+            day_tasks.setdefault(t["due_date"], []).append(t)
+        for r in db.reminders.for_period(start, end):
+            day_reminders.setdefault(r["remind_at"][:10], []).append(r)
+
+        return render_template("calendar.html", cal=cal, weekdays=WEEKDAY_NAMES,
+                               day_tasks=day_tasks, day_reminders=day_reminders, today=today)
 
     return app
 
