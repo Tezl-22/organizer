@@ -36,6 +36,7 @@ tr.overdue td { background: #fdecea; }
 .muted { color: #777; font-size: 13px; }
 .note { white-space: pre-wrap; }
 /* Календар */
+.calendar { table-layout: fixed; }
 .calendar th { text-align: center; }
 .calendar td { height: 105px; width: 14.28%; font-size: 13px; }
 .calendar td.other { background: #f6f7f9; color: #aaa; }
