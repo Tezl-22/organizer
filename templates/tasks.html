@@ -36,7 +36,7 @@
         </td>
         <td>{{ t.title }}{% if t.description %}<div class="muted">{{ t.description }}</div>{% endif %}</td>
         <td class="prio-{{ t.priority }}">{{ priorities[t.priority] }}</td>
-        <td>{{ t.due_date or '—' }}</td>
+        <td>{{ t.due_date or '–' }}</td>
         <td>
             <a class="btn small" href="{{ url_for('task_edit', task_id=t.id) }}">Редагувати</a>
             <form class="inline" method="post" action="{{ url_for('task_delete', task_id=t.id) }}" onsubmit="return confirm('Видалити задачу?');">

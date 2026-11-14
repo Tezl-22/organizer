@@ -27,7 +27,7 @@ def html(response):
     return response.get_data(as_text=True)
 
 
-def dt_local(delta):
+def dtl(delta):
     """Значення для поля datetime-local відносно поточного часу."""
     return (datetime.now() + delta).strftime("%Y-%m-%dT%H:%M")
 
@@ -166,16 +166,16 @@ def test_reminder_crud(client, app):
 def test_reminder_validation(client):
     r = client.post("/reminders/new", data={"title": "Без часу", "remind_at": ""})
     assert r.status_code == 400 and "Вкажіть дату і час" in html(r)
-    r = client.post("/reminders/new", data={"title": "Поганий час", "remind_at": "2026-11-10T25:00"})
+    r = client.post("/reminders/new", data={"title": "Час", "remind_at": "2026-11-10T25:00"})
     assert r.status_code == 400 and "Некоректні дата і час" in html(r)
     r = client.post("/reminders/new", data={"title": "", "remind_at": "2026-11-10T10:00"})
     assert r.status_code == 400 and "Назва нагадування не може бути порожньою." in html(r)
 
 
 def test_overdue_and_upcoming_reminders(client, app):
-    client.post("/reminders/new", data={"title": "Минуле", "remind_at": dt_local(timedelta(days=-1))})
-    client.post("/reminders/new", data={"title": "Скоро", "remind_at": dt_local(timedelta(hours=3))})
-    client.post("/reminders/new", data={"title": "Далеко", "remind_at": dt_local(timedelta(days=30))})
+    client.post("/reminders/new", data={"title": "Минуле", "remind_at": dtl(timedelta(-1))})
+    client.post("/reminders/new", data={"title": "Скоро", "remind_at": dtl(timedelta(hours=3))})
+    client.post("/reminders/new", data={"title": "Далеко", "remind_at": dtl(timedelta(30))})
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
     week = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d %H:%M")
@@ -185,24 +185,24 @@ def test_overdue_and_upcoming_reminders(client, app):
 
 
 def test_reminder_banner_on_every_page(client):
-    client.post("/reminders/new", data={"title": "Минуле", "remind_at": dt_local(timedelta(hours=-2))})
-    client.post("/reminders/new", data={"title": "Подзвонити мамі", "remind_at": dt_local(timedelta(hours=1))})
+    client.post("/reminders/new", data={"title": "Минуле", "remind_at": dtl(timedelta(hours=-2))})
+    client.post("/reminders/new", data={"title": "Мамі", "remind_at": dtl(timedelta(hours=1))})
     for url in ("/tasks", "/notes", "/calendar"):
         page = html(client.get(url))
         assert "Прострочених нагадувань: <strong>1</strong>" in page
-        assert "Подзвонити мамі" in page
+        assert "Мамі" in page
 
 
 # ---------- Календар ----------
 
 def test_calendar_month_shows_tasks_and_reminders(client):
-    client.post("/tasks/new", data={"title": "Здати курсову", "priority": "3", "due_date": "2026-12-15"})
+    client.post("/tasks/new", data={"title": "Курсова", "priority": "3", "due_date": "2026-12-15"})
     client.post("/reminders/new", data={"title": "Новий рік", "remind_at": "2026-12-31T23:59"})
-    client.post("/tasks/new", data={"title": "Інший місяць", "priority": "2", "due_date": "2027-02-01"})
+    client.post("/tasks/new", data={"title": "Лютий", "priority": "2", "due_date": "2027-02-01"})
     page = html(client.get("/calendar?year=2026&month=12"))
     assert "Грудень 2026" in page
-    assert "Здати курсову" in page and "Новий рік" in page
-    assert "Інший місяць" not in page
+    assert "Курсова" in page and "Новий рік" in page
+    assert "Лютий" not in page
     # посилання на сусідні місяці (перехід через рік)
     assert "year=2026&amp;month=11" in page and "year=2027&amp;month=1" in page
 
