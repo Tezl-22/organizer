@@ -4,9 +4,9 @@
 {% set py, pm = cal.prev() %}
 {% set ny, nm = cal.next() %}
 <div class="month-nav">
-    <a class="btn secondary" href="{{ url_for('calendar_view', year=py, month=pm) }}">&larr; Попередній</a>
+    {% if py >= 1900 %}<a class="btn secondary" href="{{ url_for('calendar_view', year=py, month=pm) }}">&larr; Попередній</a>{% else %}<span></span>{% endif %}
     <h2>{{ cal.title }}</h2>
-    <a class="btn secondary" href="{{ url_for('calendar_view', year=ny, month=nm) }}">Наступний &rarr;</a>
+    {% if ny <= 2100 %}<a class="btn secondary" href="{{ url_for('calendar_view', year=ny, month=nm) }}">Наступний &rarr;</a>{% else %}<span></span>{% endif %}
 </div>
 <table class="calendar">
     <tr>{% for w in weekdays %}<th>{{ w }}</th>{% endfor %}</tr>

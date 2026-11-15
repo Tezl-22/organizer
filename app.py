@@ -167,11 +167,13 @@ def create_app(test_config=None):
 
     @app.post("/tasks/<int:task_id>/toggle")
     def task_toggle(task_id):
+        db.tasks.get(task_id) or abort(404)
         db.tasks.toggle(task_id)
         return redirect(request.referrer or url_for("task_list"))
 
     @app.post("/tasks/<int:task_id>/delete")
     def task_delete(task_id):
+        db.tasks.get(task_id) or abort(404)
         db.tasks.delete(task_id)
         flash("Задачу видалено.")
         return redirect(url_for("task_list"))
@@ -213,6 +215,7 @@ def create_app(test_config=None):
 
     @app.post("/notes/<int:note_id>/delete")
     def note_delete(note_id):
+        db.notes.get(note_id) or abort(404)
         db.notes.delete(note_id)
         flash("Нотатку видалено.")
         return redirect(url_for("note_list"))
@@ -263,6 +266,7 @@ def create_app(test_config=None):
 
     @app.post("/reminders/<int:reminder_id>/delete")
     def reminder_delete(reminder_id):
+        db.reminders.get(reminder_id) or abort(404)
         db.reminders.delete(reminder_id)
         flash("Нагадування видалено.")
         return redirect(url_for("reminder_list"))
